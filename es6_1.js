@@ -122,11 +122,13 @@ console.warn(ex.name);//undefined
 // ES6 模块
 
 // AMD 是 RequireJS 在推广过程中对模块定义的规范化产出。
-// 你去看 AMD 规范) 的内容，其主要内容就是定义了 define 函数该如何书写，只要你按照这个规范书写模块和依赖，require.js 就能正确的进行解析
+// 你去看 AMD 规范) 的内容，其主要内容就是定义了 define 函数该如何书写，
+// 只要你按照这个规范书写模块和依赖，require.js 就能正确的进行解析
 
 
 // 与 AMD 一样，CMD 其实就是 SeaJS 在推广过程中对模块定义的规范化产出。
-// 你去看 CMD 规范的内容，主要内容就是描述该如何定义模块，如何引入模块，如何导出模块，只要你按照这个规范书写代码，sea.js 就能正确的进行解析。
+// 你去看 CMD 规范的内容，主要内容就是描述该如何定义模块，如何引入模块，
+// 如何导出模块，只要你按照这个规范书写代码，sea.js 就能正确的进行解析。
 
 // AMD 与 CMD 的区别
 // 从 sea.js 和 require.js 的例子可以看出：
@@ -162,7 +164,8 @@ define(function(require, exports, module) {
 // 加载了 square 模块
 // 加载了 multiply 模块
 // 9
-// AMD 是将需要使用的模块先加载完再执行代码，而 CMD 是在 require 的时候才去加载模块文件，加载完再接着执行。
+// AMD 是将需要使用的模块先加载完再执行代码，而 CMD 是在 require 
+// 的时候才去加载模块文件，加载完再接着执行。
 
 // AMD 和 CMD 都是用于浏览器端的模块规范，而在服务器端比如 node，采用的则是 CommonJS 规范。
 // 导出模块的方式：
@@ -181,7 +184,8 @@ console.log(add.add(1, 1));
 
 // CommonJS 规范加载模块是同步的，也就是说，只有加载完成，才能执行后面的操作。
 // AMD规范则是非同步加载模块，允许指定回调函数。
-// 由于 Node.js 主要用于服务器编程，模块文件一般都已经存在于本地硬盘，所以加载起来比较快，不用考虑非同步加载的方式，所以 CommonJS 规范比较适用。
+// 由于 Node.js 主要用于服务器编程，模块文件一般都已经存在于本地硬盘，
+// 所以加载起来比较快，不用考虑非同步加载的方式，所以 CommonJS 规范比较适用。
 // 但是，如果是浏览器环境，要从服务器端加载模块，这时就必须采用非同步模式，因此浏览器端一般采用 AMD 规范。
 
 // main.js
@@ -270,7 +274,102 @@ incCounter();
 console.log(counter); // 4
 // 这是因为
 
-// ES6 模块的运行机制与 CommonJS 不一样。JS 引擎对脚本静态分析的时候，遇到模块加载命令 import，就会生成一个只读引用。
-// 等到脚本真正执行时，再根据这个只读引用，到被加载的那个模块里面去取值。换句话说，ES6 的 import 有点像 Unix 系统的“符号连接”，
-// 原始值变了，import 加载的值也会跟着变。因此，ES6 模块是动态引用，并且不会缓存值，模块里面的变量绑定其所在的模块。
+// ES6 模块的运行机制与 CommonJS 不一样。JS 引擎对脚本静态分析的时候，
+// 遇到模块加载命令 import，就会生成一个只读引用。
+// 等到脚本真正执行时，再根据这个只读引用，到被加载的那个模块里面去取值。
+// 换句话说，ES6 的 import 有点像 Unix 系统的“符号连接”，
+// 原始值变了，import 加载的值也会跟着变。因此，ES6 模块是动态引用，
+// 并且不会缓存值，模块里面的变量绑定其所在的模块。
 
+// Babel
+// 鉴于浏览器支持度的问题，如果要使用 ES6 的语法，一般都会借助 Babel，可对于 import 和 export 而言
+// ，只借助 Babel 就可以吗？
+
+// 让我们看看 Babel 是怎么编译 import 和 export 语法的。
+
+// ES6
+var firstName = 'Michael';
+var lastName = 'Jackson';
+var year = 1958;
+
+export {firstName, lastName, year};
+// Babel 编译后
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var firstName = 'Michael';
+var lastName = 'Jackson';
+var year = 1958;
+
+exports.firstName = firstName;
+exports.lastName = lastName;
+exports.year = year;
+// 是不是感觉有那么一点奇怪？编译后的语法更像是 CommonJS 规范，再看 import 的编译结果：
+
+// ES6
+import {firstName, lastName, year} from './profile';
+// Babel 编译后
+'use strict';
+
+var _profile = require('./profile');
+// 你会发现 Babel 只是把 ES6 模块语法转为 CommonJS 模块语法，然而浏览器是不支持这种模块语法的，
+// 所以直接跑在浏览器会报错的，如果想要在浏览器中运行，还是需要使用打包工具将代码打包。
+
+// webpack
+// Babel 将 ES6 模块转为 CommonJS 后， webpack 又是怎么做的打包的呢？
+// 它该如何将这些文件打包在一起，从而能保证正确的处理依赖，以及能在浏览器中运行呢？
+// 这是因为浏览器环境中并没有 module、 exports、 require 等环境变量。
+// 换句话说，webpack 打包后的文件之所以在浏览器中能运行，就是靠模拟了这些变量的行为。
+
+// 那 webpack 又会将 CommonJS 项目的代码打包成什么样呢？
+(function(modules) {
+    var installedModules = {}; //用于存储已经加载过得模块
+    function require(moduleName) {
+        if (installedModules[moduleName]) {
+            return installedModules[moduleName].exports;
+        }
+        var module = installedModules[moduleName] = {
+            exports: {}
+        };
+        modules[moduleName](module, module.exports, require);
+        return module.exports;
+    }
+    //加载主模块
+    return require('main')
+})({
+    "main": function(module,exports, require) {
+        var addModule = require('./add');
+        console.warn(addModule.add(1,1))
+        var squareModule = require("./square");
+        console.warn(squareModule.square(3));
+    },
+    "./add": function(module, exports, require) {
+        console.log('加载了 add 模块');
+
+        module.exports = {
+            add: function(x, y) {
+                return x + y;
+            }
+        };
+    },
+    "./square": function(module, exports, require) {
+        console.log('加载了 square 模块');
+
+        var multiply = require("./multiply");
+        module.exports = {
+            square: function(num) {
+                return multiply.multiply(num, num);
+            }
+        };
+    },
+    "./multiply": function(module,exports, require) {
+        console.warn('加载了multiply模块');
+        module.exports = {
+            multiply: function(x, y) {
+                return x * y;
+            }
+        }
+    }
+})

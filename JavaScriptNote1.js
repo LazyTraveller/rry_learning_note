@@ -1,5 +1,5 @@
 import { async, reject } from "q";
-
+重点讲解了如原型、作用域、执行上下文、变量对象、this、闭包、按值传递、call、apply、bind、new、继承等 JS 语言中的比较难懂的概念。
 //《JavaScript学习笔记的收集》
 //1.继承方式
 function People() {

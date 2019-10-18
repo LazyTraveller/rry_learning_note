@@ -394,6 +394,18 @@ function clone(target) {
     return cloneTarget;
 }
 
+function clone(target) {
+	if (typeof target === 'object') {
+		var newtarget =target instanceof Array ? [] : {};
+		for (const key in target) {
+			newtarget[key] = clone(target[key])
+		} else {
+			return target;
+		}
+
+	}
+}
+
 //深度拷贝和考虑到数组
 //one way
 JSON.parse(JSON.stringify())
@@ -613,3 +625,4 @@ function clone1(target) {
 			    if (item == 3) return true;
 			})) // 2
 			
+
